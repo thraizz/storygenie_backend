@@ -1,0 +1,286 @@
+openapi: 3.0.1
+info:
+  title: Storygenie API - OpenAPI 3.0
+  description: |-
+    The Storygenie API is a RESTful API that allows you to create and manage user stories and projects.
+    Some useful links:
+    - [the repo](https://github.com/thraizz/storygenie)
+  termsOfService: http://storygenie.io/terms/
+  contact:
+    email: api@storygenie.io
+  version: 0.0.1
+servers:
+  - url: http://localhost:8000
+  - url: https://api.storygenie.io/api/
+tags:
+  - name: stories
+    description: Operations handling stories
+  - name: projects
+    description: Operations handling projects
+paths:
+  /story:
+    post:
+      operationId: createStory
+      summary: Creates a new story for a user
+      tags:
+        - stories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  minLength: 100
+                  maxLength: 1000
+                projectId:
+                  type: string
+              required:
+                - description
+                - projectId
+            example:
+              description: "As a user I want to be able to create a new story"
+      responses:
+        "200":
+          description: Successfully created a story
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Story"
+              example:
+                headline: "Story creation"
+                userStory: "As a user I want to be able to create a new story"
+                acceptanceCriteria:
+                  - "The story should have a headline"
+                  - "The story should have a user story"
+                  - "The story should have acceptance criteria"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    get:
+      operationId: getAllStories
+      tags:
+        - stories
+      summary: Gets all stories for a user
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+          description: The numbers of items to return
+      responses:
+        "200":
+          description: Successfully retrieved all stories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Story"
+              example:
+                data:
+                  - headline: "As a user I want to be able to create a new story"
+                    userStory: "As a user I want to be able to create a new story"
+                    acceptanceCriteria:
+                      - "The story should have a headline"
+                      - "The story should have a user story"
+                      - "The story should have acceptance criteria"
+                  - headline: "As a user I want to be able to create a new project"
+                    userStory: "As a user I want to be able to create a new project"
+                    acceptanceCriteria:
+                      - "The project should have a name"
+                      - "The project should have a description"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /story/{storyId}:
+    get:
+      operationId: getStoryById
+      tags:
+        - stories
+      summary: Gets a story for a user by id
+      parameters:
+        - in: path
+          name: storyId
+          description: The id of the story
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved a story
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Story"
+              example:
+                headline: "As a user I want to be able to create a new story"
+                userStory: "As a user I want to be able to create a new story"
+                acceptanceCriteria:
+                  - "The story should have a headline"
+                  - "The story should have a user story"
+                  - "The story should have acceptance criteria"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /project:
+    post:
+      operationId: createProject
+      tags:
+        - projects
+      summary: Creates a new project for a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Project"
+            example:
+              name: "My first project"
+              description: "This is my first project"
+      responses:
+        "200":
+          description: Successfully created a project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+              example:
+                name: "My first project"
+                description: "This is my first project"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    get:
+      operationId: getAllProjects
+      tags:
+        - projects
+      summary: Gets all projects for a user
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+          description: The numbers of items to return
+      responses:
+        "200":
+          description: Successfully retrieved all projects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Project"
+              example:
+                data:
+                  - name: "My first project"
+                    description: "This is my first project"
+                  - name: "My second project"
+                    description: "This is my second project"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  "/project/{projectId}":
+    get:
+      operationId: getProjectById
+      tags:
+        - projects
+      summary: Gets a project for a user by id
+      parameters:
+        - in: path
+          name: projectId
+          description: The id of the project
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved a project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+              example:
+                name: "My first project"
+                description: "This is my first project"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  schemas:
+    Story:
+      type: object
+      required:
+        - headline
+        - userStory
+        - acceptanceCriteria
+      properties:
+        headline:
+          type: string
+          description: The headline of the story
+        userStory:
+          type: string
+          description: The user story of the story
+        acceptanceCriteria:
+          type: array
+          description: The acceptance criteria of the story
+          items:
+            type: string
+    Project:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          description: The name of the project
+        description:
+          type: string
+          description: The description of the project
+          minLength: 300
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        hint:
+          type: string
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 401
+            message: "Bad request."
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 404
+            message: "Not found."
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 500
+            message: "Internal server error."
