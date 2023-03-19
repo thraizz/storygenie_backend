@@ -29,19 +29,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                description:
-                  type: string
-                  minLength: 100
-                  maxLength: 1000
-                projectId:
-                  type: string
-              required:
-                - description
-                - projectId
-            example:
-              description: "As a user I want to be able to create a new story"
+              $ref: "#/components/schemas/Story"
       responses:
         "200":
           description: Successfully created a story
@@ -93,6 +81,47 @@ paths:
                     - "The project should have a description"
         "404":
           $ref: "#/components/responses/NotFound"
+  /story/generate:
+    post:
+      operationId: generateStory
+      tags:
+        - stories
+      summary: Generates a new story for a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  minLength: 100
+                  maxLength: 1000
+                projectId:
+                  type: integer
+              required:
+                - description
+                - projectId
+            example:
+              description: "As a user I want to be able to create a new story"
+              projectId: 1
+      responses:
+        "200":
+          description: Successfully generated a story
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Story"
+              example:
+                headline: "As a user I want to be able to create a new story"
+                userStory: "As a user I want to be able to create a new story"
+                acceptanceCriteria:
+                  - "The story should have a headline"
+                  - "The story should have a user story"
+                  - "The story should have acceptance criteria"
+        "400":
+          $ref: "#/components/responses/BadRequest"
   /story/{storyId}:
     get:
       operationId: getStoryById
@@ -189,7 +218,7 @@ paths:
           description: The id of the project
           required: true
           schema:
-            type: string
+            type: integer
       responses:
         "200":
           description: Successfully retrieved a project
@@ -207,10 +236,15 @@ components:
     Story:
       type: object
       required:
+        - id
         - headline
         - userStory
         - acceptanceCriteria
+        - projectId
       properties:
+        id:
+          type: string
+          description: The id of the story
         headline:
           type: string
           description: The headline of the story
@@ -222,6 +256,9 @@ components:
           description: The acceptance criteria of the story
           items:
             type: string
+        project_id:
+          type: string
+          description: The id of the project
     Project:
       type: object
       required:
@@ -229,7 +266,7 @@ components:
         - description
       properties:
         ID:
-          type: string
+          type: integer
           description: The id of the project
         CreatedAt:
           type: string

@@ -12,7 +12,7 @@ func (c *PublicController) GetProjectById(context *gin.Context) {
 	var uid = context.MustGet("uid").(string)
 	var project models.Project
 	if err := c.Database.Where("id = ? AND user_id = ?", context.Param("id"), uid).First(&project).Error; err != nil {
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Internal server error"})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"data": project})
@@ -22,7 +22,7 @@ func (c *PublicController) GetProjectById(context *gin.Context) {
 func (c *PublicController) GetProjects(context *gin.Context) {
 	var projects = []models.Project{}
 	if err := c.Database.Find(&projects, "user_id = ?", context.MustGet("uid").(string)).Error; err != nil {
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Internal server error"})
 		return
 	}
 	context.JSON(http.StatusOK, projects)

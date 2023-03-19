@@ -9,15 +9,15 @@ import (
 	"storygenie-backend/models"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/datatypes"
-
 	gogpt "github.com/sashabaranov/go-gpt3"
+	"gorm.io/datatypes"
 )
 
 func (c *PublicController) GetStories(context *gin.Context) {
 	var stories = []models.Story{}
 	result := c.Database.Find(&stories, "user_id = ?", context.MustGet("uid").(string))
 	if result.Error != nil {
+		fmt.Println(result.Error.Error())
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
@@ -32,6 +32,7 @@ func (c *PublicController) GetStoryById(context *gin.Context) {
 	result := c.Database.First(&story, "id = ? AND user_id = ?", storyId, context.MustGet("uid").(string))
 
 	if result.Error != nil {
+		fmt.Println(result.Error.Error())
 		if result.Error.Error() == "record not found" {
 			context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Story not found"})
 			return
@@ -45,14 +46,14 @@ func (c *PublicController) GetStoryById(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"data": story})
+	context.JSON(http.StatusOK, story)
 }
 
 func (c *PublicController) GenerateScrumStories(context *gin.Context) {
 	client := gogpt.NewClient(os.Getenv("OPENAI_API_KEY"))
 	var requestData struct {
 		StoryDescription string `json:"description" binding:"required"`
-		ProjectId        string `json:"projectId" binding:"required"`
+		ProjectId        uint   `json:"projectId" binding:"required"`
 	}
 
 	if err := context.ShouldBindJSON(&requestData); err != nil {
@@ -70,15 +71,16 @@ func (c *PublicController) GenerateScrumStories(context *gin.Context) {
 		return
 	}
 
-	prompt := fmt.Sprintf(`Generate a scrum story with a headline, userstory and acceptance criteria. It must be in this json format and parseable with JSON.parse: { "headline": string, "userStory": string, "acceptanceCriteria": string[] }\nHeadline as short as possible. Acceptance criterias as specific as possible. No acceptance criteria beyond the specified input. Acceptance criteria and user story can reference the project description. Project is:\n%s\nStory is:\n%s`, project.Description, requestData.StoryDescription)
+	prompt := fmt.Sprintf(`Generate a scrum story with a headline, userstory and acceptance criteria. It must be in valid JSON format, like this: { "headline": string, "userStory": string, "acceptanceCriteria": string[] }\nHeadline as short as possible. Acceptance criterias as specific as possible. No acceptance criteria beyond the specified input. Acceptance criteria and user story can reference the project description. Project is:%s, Story is:%s`, project.Description, requestData.StoryDescription)
 
 	completionParams := &gogpt.CompletionRequest{
 		Prompt:      prompt,
 		Model:       "text-davinci-003",
-		MaxTokens:   1000,
+		MaxTokens:   2000,
 		Temperature: 0,
 	}
 
+	// result = &gogpt.CompletionResponse{ID: "cmpl-6vphbYRAfVP5K8xu1k1ot4O54EZX0", Object: "text_completion", Created: 1679241459, Model: "text-davinci-003", Choices: []gogpt.CompletionChoice[(*"github.com/sashabaranov/go-gpt3.CompletionChoice")(0x140004d0900)], Usage: github.com/sashabaranov/go-gpt3.Usage {PromptTokens: 139, CompletionTokens: 144, TotalTokens: 283}}
 	result, err := client.CreateCompletion(context, *completionParams)
 	if err != nil {
 		log.Println(err.Error())
@@ -103,11 +105,13 @@ func (c *PublicController) GenerateScrumStories(context *gin.Context) {
 		return
 	}
 
+	acceptanceCriteriaStrSlice := parsedStory["acceptanceCriteria"].([]byte)
+
 	// Save the story to the database
 	newStory := models.Story{
 		Headline:           parsedStory["headline"].(string),
 		UserStory:          parsedStory["userStory"].(string),
-		AcceptanceCriteria: parsedStory["acceptanceCriteria"].(datatypes.JSON),
+		AcceptanceCriteria: datatypes.JSON([]byte(acceptanceCriteriaStrSlice)),
 	}
 
 	if err := c.Database.Create(&newStory).Error; err != nil {
@@ -119,4 +123,22 @@ func (c *PublicController) GenerateScrumStories(context *gin.Context) {
 
 	// Return the ID of the newly created story
 	context.JSON(http.StatusOK, gin.H{"data": newStory.ID})
+}
+
+func (c *PublicController) CreateStory(context *gin.Context) {
+	var input models.Story
+	if err := context.ShouldBindJSON(&input); err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	input.UserID = context.MustGet("uid").(string)
+
+	input.AcceptanceCriteria = datatypes.JSON([]byte(input.AcceptanceCriteria))
+
+	result := c.Database.Create(&input)
+	if result.Error != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, input)
 }
