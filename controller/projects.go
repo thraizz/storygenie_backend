@@ -20,12 +20,12 @@ func (c *PublicController) GetProjectById(context *gin.Context) {
 
 // Get all projects from this user
 func (c *PublicController) GetProjects(context *gin.Context) {
-	var project = []models.Project{}
-	if err := c.Database.Find(&project, "user_id = ?", context.MustGet("uid").(string)).Error; err != nil {
+	var projects = []models.Project{}
+	if err := c.Database.Find(&projects, "user_id = ?", context.MustGet("uid").(string)).Error; err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"data": project})
+	context.JSON(http.StatusOK, projects)
 }
 
 // Create a new project

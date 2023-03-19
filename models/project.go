@@ -11,5 +11,6 @@ type Project struct {
 	// The description of the project
 	Description string `json:"description"`
 	// The user id of the project
-	UserID string `json:"user_id"`
+	UserID    string `json:"user_id"`
+	IsExample bool   `json:"isExample"`
 }

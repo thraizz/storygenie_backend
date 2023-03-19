@@ -15,14 +15,14 @@ import (
 )
 
 func (c *PublicController) GetStories(context *gin.Context) {
-	var story = []models.Story{}
-	result := c.Database.Find(&story, "user_id = ?", context.MustGet("uid").(string))
+	var stories = []models.Story{}
+	result := c.Database.Find(&stories, "user_id = ?", context.MustGet("uid").(string))
 	if result.Error != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"data": story})
+	context.JSON(http.StatusOK, stories)
 }
 
 func (c *PublicController) GetStoryById(context *gin.Context) {

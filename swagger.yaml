@@ -76,25 +76,21 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Story"
+                type: array
+                items:
+                  $ref: "#/components/schemas/Story"
               example:
-                data:
-                  - headline: "As a user I want to be able to create a new story"
-                    userStory: "As a user I want to be able to create a new story"
-                    acceptanceCriteria:
-                      - "The story should have a headline"
-                      - "The story should have a user story"
-                      - "The story should have acceptance criteria"
-                  - headline: "As a user I want to be able to create a new project"
-                    userStory: "As a user I want to be able to create a new project"
-                    acceptanceCriteria:
-                      - "The project should have a name"
-                      - "The project should have a description"
+                - headline: "As a user I want to be able to create a new story"
+                  userStory: "As a user I want to be able to create a new story"
+                  acceptanceCriteria:
+                    - "The story should have a headline"
+                    - "The story should have a user story"
+                    - "The story should have acceptance criteria"
+                - headline: "As a user I want to be able to create a new project"
+                  userStory: "As a user I want to be able to create a new project"
+                  acceptanceCriteria:
+                    - "The project should have a name"
+                    - "The project should have a description"
         "404":
           $ref: "#/components/responses/NotFound"
   /story/{storyId}:
@@ -171,18 +167,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Project"
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
               example:
-                data:
-                  - name: "My first project"
-                    description: "This is my first project"
-                  - name: "My second project"
-                    description: "This is my second project"
+                - name: "My first project"
+                  description: "This is my first project"
+                - name: "My second project"
+                  description: "This is my second project"
         "404":
           $ref: "#/components/responses/NotFound"
   "/project/{projectId}":
@@ -259,6 +251,9 @@ components:
         user_id:
           type: string
           description: The id of the user
+        isExample:
+          type: boolean
+          description: Whether the project is an example project
       example:
         name: "My first project"
         description: "This is my first project"

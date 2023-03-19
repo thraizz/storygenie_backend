@@ -7,6 +7,7 @@ import (
 	"storygenie-backend/database"
 	"storygenie-backend/helper"
 	"storygenie-backend/middleware"
+	"storygenie-backend/models"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -22,10 +23,10 @@ func main() {
 
 func loadDatabase() *gorm.DB {
 	database := database.Connect()
-	// database.AutoMigrate(&models.User{})
-	// database.AutoMigrate(&models.Project{})
-	// database.AutoMigrate(&models.Prompt{})
-	// database.AutoMigrate(&models.Story{})
+	database.AutoMigrate(&models.User{})
+	database.AutoMigrate(&models.Project{})
+	database.AutoMigrate(&models.Prompt{})
+	database.AutoMigrate(&models.Story{})
 	return database
 }
 
