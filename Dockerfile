@@ -1,17 +1,32 @@
-# Start from the official golang image
-FROM golang:latest
+# Use base golang image from Docker Hub
+FROM golang:1.19 AS build
 
-# Set the working directory
-WORKDIR /app
+WORKDIR /storygenie-backend
 
-# Copy the source code to the container
-COPY . .
+# Install dependencies in go.mod and go.sum
+COPY go.mod go.sum ./
+RUN go mod download
 
-# Build the Go application
-RUN go build -o storygenie-backend
+# Copy rest of the application source code
+COPY . ./
 
-# Expose port 8080 to the outside world
-EXPOSE 8080
+# Compile the application to /app.
+# Skaffold passes in debug-oriented compiler flags
+ARG SKAFFOLD_GO_GCFLAGS
+RUN echo "Go gcflags: ${SKAFFOLD_GO_GCFLAGS}"
+RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -mod=readonly -v -o /app
 
-# Start the Go application
-CMD ["./storygenie-backend"]
+# Now create separate deployment image
+FROM gcr.io/distroless/base
+
+# Definition of this variable is used by 'skaffold debug' to identify a golang binary.
+# Default behavior - a failure prints a stack trace for the current goroutine.
+# See https://golang.org/pkg/runtime/
+ENV GOTRACEBACK=single
+ENV GIN_MODE=release
+
+# Copy template & assets
+WORKDIR /storygenie-backend
+COPY --from=build /app ./app
+
+ENTRYPOINT ["./app"]
