@@ -1,5 +1,7 @@
 package main
 
+//go:generate oapi-codegen --package=api -generate=types -o ./api/storygenie.gen.go https://api.swaggerhub.com/apis/swagger354/storygenie/0.0.2
+
 import (
 	"log"
 	"os"
@@ -7,6 +9,7 @@ import (
 	"storygenie-backend/database"
 	"storygenie-backend/helper"
 	"storygenie-backend/middleware"
+	"storygenie-backend/models"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -22,18 +25,16 @@ func main() {
 
 func loadDatabase() *gorm.DB {
 	database := database.Connect()
-	// database.AutoMigrate(&models.User{})
-	// database.AutoMigrate(&models.Project{})
-	// database.AutoMigrate(&models.Prompt{})
-	// database.AutoMigrate(&models.Story{})
+	database.AutoMigrate(&models.User{})
+	database.AutoMigrate(&models.Product{})
+	database.AutoMigrate(&models.Prompt{})
+	database.AutoMigrate(&models.Story{})
+	database.AutoMigrate(&models.Feedback{})
 	return database
 }
 
 func loadEnv() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	godotenv.Load(".env")
 }
 
 func serveApplication() {
@@ -41,20 +42,22 @@ func serveApplication() {
 	router := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
-	config.AllowOrigins = []string{"http://localhost:5173", "https://app.storygenie.io"}
+	config.AllowOrigins = []string{"http://localhost:5173", "http://localhost:3200", "https://app.storygenie.io"}
 	router.Use(cors.New(config))
 	router.GET("/health", pCtrl.HealthCheck)
-	router.GET("/seed", pCtrl.SeedDatabase)
 	privateRoutes := router.Group("/api")
 	privateRoutes.Use(middleware.Authentication)
 	privateRoutes.GET("/story", pCtrl.GetStories)
 	privateRoutes.GET("/story/:storyId", pCtrl.GetStoryById)
 	privateRoutes.POST("/story", pCtrl.CreateStory)
-	// privateRoutes.POST("/story/generate", pCtrl.GenerateScrumStories)
-	privateRoutes.GET("/project", pCtrl.GetProjects)
-	privateRoutes.GET("/project/:storyId", pCtrl.GetProjects)
-	privateRoutes.POST("/project", pCtrl.CreateProject)
-	privateRoutes.DELETE("/project/:projectId", pCtrl.DeleteProject)
+	privateRoutes.DELETE("/story/:storyId", pCtrl.DeleteStory)
+	privateRoutes.GET("/story/:storyId/feedback", pCtrl.GetFeedbackForStory)
+	privateRoutes.POST("/story/:storyId/feedback", pCtrl.CreateFeedback)
+	privateRoutes.POST("/story/generate", pCtrl.GenerateScrumStories)
+	privateRoutes.GET("/product", pCtrl.GetProducts)
+	privateRoutes.GET("/product/:productId", pCtrl.GetProductById)
+	privateRoutes.POST("/product", pCtrl.CreateProduct)
+	privateRoutes.DELETE("/product/:productId", pCtrl.DeleteProduct)
 
 	port := os.Getenv("PORT")
 	if port == "" {

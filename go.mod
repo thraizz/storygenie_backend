@@ -15,6 +15,25 @@ require (
 )
 
 require (
+	github.com/deepmap/oapi-codegen v1.12.4 // indirect
+	github.com/getkin/kin-openapi v0.107.0 // indirect
+	github.com/go-openapi/jsonpointer v0.19.5 // indirect
+	github.com/go-openapi/swag v0.21.1 // indirect
+	github.com/invopop/yaml v0.1.0 // indirect
+	github.com/josharian/intern v1.0.0 // indirect
+	github.com/labstack/echo/v4 v4.9.1 // indirect
+	github.com/labstack/gommon v0.4.0 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasttemplate v1.2.2 // indirect
+	golang.org/x/mod v0.7.0 // indirect
+	golang.org/x/tools v0.3.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
+)
+
+require (
 	cloud.google.com/go v0.102.1 // indirect
 	cloud.google.com/go/compute v1.7.0 // indirect
 	cloud.google.com/go/firestore v1.6.1 // indirect
@@ -44,7 +63,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/satori/go.uuid v1.2.0

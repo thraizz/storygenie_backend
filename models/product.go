@@ -1,13 +1,17 @@
 package models
 
 import (
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type Project struct {
+type ProductInput struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+type Product struct {
 	gorm.Model
-	ID          uuid.UUID `json:"id"`
+	UID         uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	UserID      string    `json:"user_id"`
@@ -16,7 +20,7 @@ type Project struct {
 }
 
 // Set a UUID as the primary key
-func (project *Project) BeforeCreate(tx *gorm.DB) (err error) {
-	project.ID = uuid.NewV4()
+func (product *Product) BeforeCreate(tx *gorm.DB) (err error) {
+	product.UID = uuid.New()
 	return
 }

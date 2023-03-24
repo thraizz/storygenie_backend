@@ -8,10 +8,10 @@ import (
 )
 
 func Authentication(c *gin.Context) {
-	uid, err := helper.GetUserFromRequest(c)
+	user_id, err := helper.GetUserFromRequest(c)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	c.Set("uid", uid)
+	c.Set("user_id", user_id)
 }

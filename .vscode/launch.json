@@ -5,7 +5,31 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Package",
+      "name": "Cloud Run: Run/Debug Locally",
+      "type": "cloudcode.cloudrun",
+      "request": "launch",
+      "build": {
+        "docker": {
+          "path": "Dockerfile"
+        }
+      },
+      "image": "storygenie_backend",
+      "service": {
+        "name": "storygeniebackend",
+        "containerPort": 7997,
+        "resources": {
+          "limits": {
+            "memory": "256Mi"
+          }
+        }
+      },
+      "target": {
+        "minikube": {}
+      },
+      "watch": true
+    },
+    {
+      "name": "Run package",
       "type": "go",
       "request": "launch",
       "mode": "auto",
