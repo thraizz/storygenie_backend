@@ -90,7 +90,16 @@ func (c *PublicController) CreateProduct(context *gin.Context) {
 		UserID:      context.MustGet("user_id").(string),
 	}
 	c.Database.Create(&product)
-	context.JSON(http.StatusOK, gin.H{"data": product})
+	response := api.Product{
+		CreatedAt:   product.CreatedAt,
+		UpdatedAt:   product.UpdatedAt,
+		DeletedAt:   &product.DeletedAt.Time,
+		Description: product.Description,
+		IsExample:   product.IsExample,
+		Id:          product.UID,
+		Name:        product.Name,
+	}
+	context.JSON(http.StatusOK, response)
 }
 
 // Delete a product by id

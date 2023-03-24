@@ -2,10 +2,18 @@
 
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	uuid "github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type Prompt struct {
-	gorm.Model
+	UID       uuid.UUID `json:"id" gorm:"primary_key;"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 	// The description of the prompt
 	Description string `json:"description"`
 	// The version of the prompt

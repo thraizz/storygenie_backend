@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	uuid "github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -10,12 +12,14 @@ type ProductInput struct {
 	Description string `json:"description"`
 }
 type Product struct {
-	gorm.Model
-	UID         uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	UserID      string    `json:"user_id"`
-	IsExample   bool      `json:"isExample"`
+	UID         uuid.UUID `json:"id" gorm:"primary_key;"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	UserID      string         `json:"user_id"`
+	IsExample   bool           `json:"isExample"`
 	Story       []Story
 }
 

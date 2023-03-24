@@ -36,7 +36,8 @@
       "program": "${workspaceFolder}/main.go",
       "env": {
         "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceFolder}/serviceAccountKey.json",
-        "FIREBASE_AUTH_EMULATOR_HOST": "localhost:9099"
+        "FIREBASE_AUTH_EMULATOR_HOST": "localhost:9099",
+        "ENVIROMENT": "dev"
       }
     }
   ]

@@ -10,13 +10,15 @@ import (
 	"storygenie-backend/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	gogpt "github.com/sashabaranov/go-gpt3"
 	"gorm.io/datatypes"
 )
 
 func (c *PublicController) GetStories(context *gin.Context) {
+	user_id := context.MustGet("user_id").(string)
 	var stories = []models.Story{}
-	result := c.Database.Model(&models.Story{}).Preload("Product").Find(&stories, "user_id = ?", context.MustGet("user_id").(string))
+	result := c.Database.Find(&stories, "user_id = ?", user_id)
 	if result.Error != nil {
 		fmt.Println(result.Error.Error())
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
@@ -25,17 +27,6 @@ func (c *PublicController) GetStories(context *gin.Context) {
 
 	var response = []api.Story{}
 	for _, story := range stories {
-		// Map the product from the reponse to an api.Product struct
-		product := api.Product{
-			CreatedAt:   story.Product.CreatedAt,
-			UpdatedAt:   story.Product.UpdatedAt,
-			DeletedAt:   &story.Product.DeletedAt.Time,
-			Description: story.Product.Description,
-			IsExample:   story.Product.IsExample,
-			Id:          story.Product.UID,
-			Name:        story.Product.Name,
-		}
-
 		response = append(response, api.Story{
 			CreatedAt:          story.CreatedAt,
 			UpdatedAt:          story.UpdatedAt,
@@ -44,7 +35,6 @@ func (c *PublicController) GetStories(context *gin.Context) {
 			Headline:           story.Headline,
 			UserStory:          story.UserStory,
 			AcceptanceCriteria: story.AcceptanceCriteria.Data,
-			Product:            product,
 		})
 	}
 
@@ -52,11 +42,13 @@ func (c *PublicController) GetStories(context *gin.Context) {
 }
 
 func (c *PublicController) GetStoryById(context *gin.Context) {
-	storyId := context.Param("storyId")
-	fmt.Println(storyId)
-
-	var story = models.Story{}
-	result := c.Database.First(&story, "uid = ? AND user_id = ?", storyId, context.MustGet("user_id").(string))
+	var user_id = context.MustGet("user_id").(string)
+	storyId := uuid.MustParse(context.Param("storyId"))
+	var story = models.Story{
+		UserID: user_id,
+		UID:    storyId,
+	}
+	result := c.Database.First(&story, "uid = ? AND user_id = ?", storyId, user_id)
 
 	if result.Error != nil {
 		fmt.Println(result.Error.Error())
@@ -155,8 +147,18 @@ func (c *PublicController) GenerateScrumStories(context *gin.Context) {
 		return
 	}
 
-	// Return the ID of the newly created story
-	context.JSON(http.StatusOK, gin.H{"data": newStory.ID})
+	response := api.Story{
+		CreatedAt:          newStory.CreatedAt,
+		UpdatedAt:          newStory.UpdatedAt,
+		DeletedAt:          &newStory.DeletedAt.Time,
+		Id:                 newStory.UID,
+		Headline:           newStory.Headline,
+		UserStory:          newStory.UserStory,
+		AcceptanceCriteria: newStory.AcceptanceCriteria.Data,
+		ProductId:          requestData.ProductId,
+	}
+	// Return the newly created story
+	context.JSON(http.StatusOK, response)
 }
 
 func (c *PublicController) CreateStory(context *gin.Context) {

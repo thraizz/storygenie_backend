@@ -1,20 +1,24 @@
 package models
 
 import (
+	"time"
+
 	uuid "github.com/google/uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
 type Story struct {
-	gorm.Model
-	UID                uuid.UUID                    `json:"id"`
+	UID                uuid.UUID `json:"id" gorm:"primary_key;"`
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+	DeletedAt          gorm.DeletedAt               `gorm:"index"`
 	UserID             string                       `json:"user_id"`
 	Headline           string                       `gorm:"type:text" json:"headline"`
 	UserStory          string                       `gorm:"type:text" json:"userStory"`
 	AcceptanceCriteria datatypes.JSONType[[]string] `json:"acceptanceCriteria"`
 	Product            Product
-	ProductID          uint `json:"productId"`
+	ProductID          uuid.UUID `json:"productId"`
 }
 
 type GetStoryInput struct {

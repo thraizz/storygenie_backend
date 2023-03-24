@@ -9,7 +9,6 @@ import (
 	"storygenie-backend/database"
 	"storygenie-backend/helper"
 	"storygenie-backend/middleware"
-	"storygenie-backend/models"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -25,13 +24,6 @@ func main() {
 
 func loadDatabase() *gorm.DB {
 	database := database.Connect()
-	if os.Getenv("ENVIRONMENT") != "production" {
-		database.AutoMigrate(&models.User{})
-		database.AutoMigrate(&models.Product{})
-		database.AutoMigrate(&models.Prompt{})
-		database.AutoMigrate(&models.Story{})
-		database.AutoMigrate(&models.Feedback{})
-	}
 	return database
 }
 
@@ -49,6 +41,9 @@ func serveApplication() {
 	router.GET("/health", pCtrl.HealthCheck)
 	privateRoutes := router.Group("/api")
 	privateRoutes.Use(middleware.Authentication)
+	if os.Getenv("ENVIRONMENT") != "production" {
+		privateRoutes.GET("/seed", pCtrl.SeedDatabase)
+	}
 	privateRoutes.GET("/story", pCtrl.GetStories)
 	privateRoutes.GET("/story/:storyId", pCtrl.GetStoryById)
 	privateRoutes.POST("/story", pCtrl.CreateStory)
