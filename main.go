@@ -25,11 +25,13 @@ func main() {
 
 func loadDatabase() *gorm.DB {
 	database := database.Connect()
-	database.AutoMigrate(&models.User{})
-	database.AutoMigrate(&models.Product{})
-	database.AutoMigrate(&models.Prompt{})
-	database.AutoMigrate(&models.Story{})
-	database.AutoMigrate(&models.Feedback{})
+	if os.Getenv("ENVIRONMENT") != "production" {
+		database.AutoMigrate(&models.User{})
+		database.AutoMigrate(&models.Product{})
+		database.AutoMigrate(&models.Prompt{})
+		database.AutoMigrate(&models.Story{})
+		database.AutoMigrate(&models.Feedback{})
+	}
 	return database
 }
 
