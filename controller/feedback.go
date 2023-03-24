@@ -23,7 +23,11 @@ func (c *PublicController) CreateFeedback(context *gin.Context) {
 		UserID:  context.MustGet("user_id").(string),
 	}
 	c.Database.Create(&feedback)
-	context.JSON(http.StatusOK, feedback)
+	response := api.Feedback{
+		Liked:   feedback.Liked,
+		StoryId: feedback.StoryID,
+	}
+	context.JSON(http.StatusOK, response)
 }
 
 func (c *PublicController) GetFeedbackForStory(context *gin.Context) {
