@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -35,7 +36,9 @@ func GetUserFromRequest(ctx *gin.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Println(claims)
+	if os.Getenv("ENVIRONMENT") != "production" {
+		log.Println(claims)
+	}
 	uid := claims["user_id"]
 	if uid == nil {
 		return "", fmt.Errorf("no uid in token")
