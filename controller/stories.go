@@ -18,7 +18,7 @@ import (
 func (c *PublicController) GetStories(context *gin.Context) {
 	user_id := context.MustGet("user_id").(string)
 	var stories = []models.Story{}
-	result := c.Database.Find(&stories, "user_id = ?", user_id)
+	result := c.Database.Model(&models.Story{}).Joins("Product").Find(&stories, "stories.user_id = ?", user_id)
 	if result.Error != nil {
 		fmt.Println(result.Error.Error())
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
@@ -27,14 +27,25 @@ func (c *PublicController) GetStories(context *gin.Context) {
 
 	var response = []api.Story{}
 	for _, story := range stories {
+		product := api.Product{
+			Name:        story.Product.Name,
+			Id:          story.Product.UID,
+			Description: story.Product.Description,
+			CreatedAt:   story.Product.CreatedAt,
+			DeletedAt:   nil,
+			IsExample:   story.Product.IsExample,
+			UpdatedAt:   story.Product.UpdatedAt,
+		}
 		response = append(response, api.Story{
 			CreatedAt:          story.CreatedAt,
 			UpdatedAt:          story.UpdatedAt,
-			DeletedAt:          &story.DeletedAt.Time,
+			DeletedAt:          nil,
 			Id:                 story.UID,
 			Headline:           story.Headline,
 			UserStory:          story.UserStory,
 			AcceptanceCriteria: story.AcceptanceCriteria.Data,
+			Product:            product,
+			ProductId:          story.ProductID,
 		})
 	}
 

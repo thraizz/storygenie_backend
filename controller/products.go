@@ -34,6 +34,7 @@ func (c *PublicController) GetProductById(context *gin.Context) {
 		stories = append(stories, api.Story{
 			CreatedAt:          product.CreatedAt,
 			UpdatedAt:          product.UpdatedAt,
+			DeletedAt:          nil,
 			Id:                 product.UID,
 			AcceptanceCriteria: product.AcceptanceCriteria.Data,
 			Headline:           product.Headline,
@@ -45,6 +46,7 @@ func (c *PublicController) GetProductById(context *gin.Context) {
 	var response = api.ProductWithStories{
 		CreatedAt:   product.CreatedAt,
 		UpdatedAt:   product.UpdatedAt,
+		DeletedAt:   nil,
 		Description: product.Description,
 		IsExample:   product.IsExample,
 		Id:          product.UID,
@@ -66,7 +68,7 @@ func (c *PublicController) GetProducts(context *gin.Context) {
 		response = append(response, api.Product{
 			CreatedAt:   product.CreatedAt,
 			UpdatedAt:   product.UpdatedAt,
-			DeletedAt:   &product.DeletedAt.Time,
+			DeletedAt:   nil,
 			Description: product.Description,
 			IsExample:   product.IsExample,
 			Id:          product.UID,
