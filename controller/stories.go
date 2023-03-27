@@ -8,11 +8,11 @@ import (
 	"os"
 	"storygenie-backend/api"
 	"storygenie-backend/models"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	gogpt "github.com/sashabaranov/go-gpt3"
-	"gorm.io/datatypes"
 )
 
 func (c *PublicController) GetStories(context *gin.Context) {
@@ -43,7 +43,7 @@ func (c *PublicController) GetStories(context *gin.Context) {
 			Id:                 story.UID,
 			Headline:           story.Headline,
 			UserStory:          story.UserStory,
-			AcceptanceCriteria: story.AcceptanceCriteria.Data,
+			AcceptanceCriteria: story.AcceptanceCriteria,
 			Product:            product,
 			ProductId:          story.ProductID,
 		})
@@ -83,13 +83,14 @@ func (c *PublicController) GetStoryById(context *gin.Context) {
 		Id:                 story.UID,
 		Headline:           story.Headline,
 		UserStory:          story.UserStory,
-		AcceptanceCriteria: story.AcceptanceCriteria.Data,
+		AcceptanceCriteria: story.AcceptanceCriteria,
 	}
 
 	context.JSON(http.StatusOK, response)
 }
 
 func (c *PublicController) GenerateScrumStories(context *gin.Context) {
+	user_id := context.MustGet("user_id").(string)
 	var requestData api.GenerateStoryJSONRequestBody
 
 	if err := context.ShouldBindJSON(&requestData); err != nil {
@@ -98,6 +99,7 @@ func (c *PublicController) GenerateScrumStories(context *gin.Context) {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
+	productId := uuid.Must(requestData.ProductId, nil)
 
 	// Get product from request body productId
 	var product models.Product
@@ -133,22 +135,24 @@ func (c *PublicController) GenerateScrumStories(context *gin.Context) {
 		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Something went wrong while generating your story."})
 		return
 	}
+	storyWithoutNewLines := strings.ReplaceAll(story, "\n", "")
+	var parsedStory api.Story
 
-	var parsedStory map[string]interface{}
-	if err := json.Unmarshal([]byte(story), &parsedStory); err != nil {
+	if err := json.Unmarshal([]byte(storyWithoutNewLines), &parsedStory); err != nil {
 		log.Println(err.Error())
 		// Return a 500 Internal Server Error if the generated story is invalid JSON
 		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Something went wrong while generating your story."})
 		return
 	}
 
-	acceptanceCriteriaStrSlice := parsedStory["acceptanceCriteria"].(datatypes.JSONType[[]string])
-
 	// Save the story to the database
 	newStory := models.Story{
-		Headline:           parsedStory["headline"].(string),
-		UserStory:          parsedStory["userStory"].(string),
-		AcceptanceCriteria: acceptanceCriteriaStrSlice,
+		Headline:           parsedStory.Headline,
+		UserStory:          parsedStory.UserStory,
+		AcceptanceCriteria: parsedStory.AcceptanceCriteria,
+		ProductID:          productId,
+		UserID:             user_id,
+		UID:                uuid.New(),
 	}
 
 	if err := c.Database.Create(&newStory).Error; err != nil {
@@ -165,8 +169,8 @@ func (c *PublicController) GenerateScrumStories(context *gin.Context) {
 		Id:                 newStory.UID,
 		Headline:           newStory.Headline,
 		UserStory:          newStory.UserStory,
-		AcceptanceCriteria: newStory.AcceptanceCriteria.Data,
-		ProductId:          requestData.ProductId,
+		AcceptanceCriteria: newStory.AcceptanceCriteria,
+		ProductId:          productId,
 	}
 	// Return the newly created story
 	context.JSON(http.StatusOK, response)

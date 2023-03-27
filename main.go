@@ -24,6 +24,9 @@ func main() {
 
 func loadDatabase() *gorm.DB {
 	database := database.Connect()
+	// database.AutoMigrate(&models.Story{})
+	// database.AutoMigrate(&models.Product{})
+	// database.AutoMigrate(&models.Feedback{})
 	return database
 }
 
@@ -41,9 +44,9 @@ func serveApplication() {
 	router.GET("/health", pCtrl.HealthCheck)
 	privateRoutes := router.Group("/api")
 	privateRoutes.Use(middleware.Authentication)
-	if os.Getenv("ENVIRONMENT") != "production" {
-		privateRoutes.GET("/seed", pCtrl.SeedDatabase)
-	}
+	// if os.Getenv("ENVIRONMENT") != "production" {
+	// 	privateRoutes.GET("/seed", pCtrl.SeedDatabase)
+	// }
 	privateRoutes.GET("/story", pCtrl.GetStories)
 	privateRoutes.GET("/story/:storyId", pCtrl.GetStoryById)
 	privateRoutes.POST("/story", pCtrl.CreateStory)

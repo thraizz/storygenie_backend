@@ -31,18 +31,19 @@ func (c *PublicController) SeedDatabase(context *gin.Context) {
 	}
 	c.Database.Create(&firstProduct)
 
+	var acceptanceCriteria = datatypes.JSON([]byte(`[{"name": "Search for images", "isDone": false}, {"name": "Search for videos", "isDone": false}]`))
 	firstStory := models.Story{
+		AcceptanceCriteria: acceptanceCriteria,
 		Headline:           "Rearrange Alert Colors",
 		UserStory:          "As a user, I want to see the right colors in the alerts as well as for the occurences of the secondary color.",
-		AcceptanceCriteria: datatypes.JSONType[[]string]{[]string{"Every secondary color ocurrence should be checkend in Storygenie", "Alert colors align with the colors in the design"}},
 		ProductID:          firstProduct.UID,
 		UserID:             user_id,
 	}
 	c.Database.Create(&firstStory)
 	secondStory := models.Story{
+		AcceptanceCriteria: acceptanceCriteria,
 		Headline:           "Add code search across organization",
 		UserStory:          "As a user, I want to search for code across my organization.",
-		AcceptanceCriteria: datatypes.JSONType[[]string]{[]string{"Code should be searchable across organization", "Code results should be ordered by relevance"}},
 		ProductID:          firstProduct.UID,
 		UserID:             user_id,
 	}
@@ -56,17 +57,17 @@ func (c *PublicController) SeedDatabase(context *gin.Context) {
 	}
 	c.Database.Create(&secondProduct)
 	thirdStory := models.Story{
+		AcceptanceCriteria: acceptanceCriteria,
 		Headline:           "Add image search",
 		UserStory:          "As a user, I want to search for images.",
-		AcceptanceCriteria: datatypes.JSONType[[]string]{[]string{"Images should be searchable", "Images should be ordered by relevance"}},
 		ProductID:          secondProduct.UID,
 		UserID:             user_id,
 	}
 	c.Database.Create(&thirdStory)
 	fourthStory := models.Story{
+		AcceptanceCriteria: acceptanceCriteria,
 		Headline:           "Add video search",
 		UserStory:          "As a user, I want to search for videos.",
-		AcceptanceCriteria: datatypes.JSONType[[]string]{[]string{"Videos should be searchable", "Videos should be ordered by relevance"}},
 		ProductID:          secondProduct.UID,
 		UserID:             user_id,
 	}

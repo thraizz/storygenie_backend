@@ -14,3 +14,21 @@ To generate the types from the OpenAPI spec, we use [oapi-codegen](https://githu
 ```bash
 go generate
 ```
+
+## Operations
+
+Building with Cloud Build:
+
+```bash
+gcloud builds submit --tag us-central1-docker.pkg.dev/storygenie-7e240/cloud-run-source-deploy/storygeniebackend:latest
+```
+
+Deploying with Cloud Run:
+
+```bash
+gcloud run deploy storygeniebackend \
+--image=us-central1-docker.pkg.dev/storygenie-7e240/cloud-run-source-deploy/storygeniebackend:latest \
+--region=us-central1 \
+--project=storygenie-7e240 \
+ && gcloud run services update-traffic storygeniebackend --to-latest --region=us-central1 --project=storygenie-7e240
+```

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
+	"gorm.io/datatypes"
 )
 
 const (
@@ -81,7 +82,7 @@ type ProductWithStories struct {
 // Story defines model for Story.
 type Story struct {
 	// AcceptanceCriteria The acceptance criteria of the story
-	AcceptanceCriteria []string `json:"acceptanceCriteria"`
+	AcceptanceCriteria datatypes.JSON `json:"acceptanceCriteria"`
 
 	// CreatedAt The date the product was created
 	CreatedAt time.Time `json:"createdAt"`

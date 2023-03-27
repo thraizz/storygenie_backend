@@ -36,7 +36,7 @@ func (c *PublicController) GetProductById(context *gin.Context) {
 			UpdatedAt:          product.UpdatedAt,
 			DeletedAt:          nil,
 			Id:                 product.UID,
-			AcceptanceCriteria: product.AcceptanceCriteria.Data,
+			AcceptanceCriteria: product.AcceptanceCriteria,
 			Headline:           product.Headline,
 			UserStory:          product.UserStory,
 			ProductId:          product.Product.UID,
@@ -107,8 +107,9 @@ func (c *PublicController) CreateProduct(context *gin.Context) {
 // Delete a product by id
 func (c *PublicController) DeleteProduct(context *gin.Context) {
 	var uid = context.MustGet("user_id").(string)
+	productId := uuid.MustParse(context.Param("productId"))
 	var product models.Product
-	if err := c.Database.Where("uid = ? AND user_id = ?", context.Param("id"), uid).First(&product).Error; err != nil {
+	if err := c.Database.Where("uid = ? AND user_id = ?", productId, uid).First(&product).Error; err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}

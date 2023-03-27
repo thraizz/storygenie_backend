@@ -12,11 +12,11 @@ type Story struct {
 	UID                uuid.UUID `json:"id" gorm:"primary_key;"`
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
-	DeletedAt          gorm.DeletedAt               `gorm:"index"`
-	UserID             string                       `json:"user_id"`
-	Headline           string                       `gorm:"type:text" json:"headline"`
-	UserStory          string                       `gorm:"type:text" json:"userStory"`
-	AcceptanceCriteria datatypes.JSONType[[]string] `json:"acceptanceCriteria"`
+	DeletedAt          gorm.DeletedAt `gorm:"index"`
+	UserID             string         `json:"user_id"`
+	Headline           string         `gorm:"type:text" json:"headline"`
+	UserStory          string         `gorm:"type:text" json:"userStory"`
+	AcceptanceCriteria datatypes.JSON `json:"acceptanceCriteria"`
 	Product            Product
 	ProductID          uuid.UUID `json:"productId"`
 }
