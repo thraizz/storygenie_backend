@@ -9,7 +9,7 @@ import (
 )
 
 func Connect() *gorm.DB {
-	database, err := gorm.Open(mysql.Open(os.Getenv("DSN")), &gorm.Config{
+	database, err := gorm.Open(mysql.Open(os.Getenv("DB_DSN")), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {

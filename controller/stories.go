@@ -119,7 +119,6 @@ func (c *PublicController) GenerateScrumStories(context *gin.Context) {
 		Temperature: 0,
 	}
 
-	// result = &gogpt.CompletionResponse{ID: "cmpl-6vphbYRAfVP5K8xu1k1ot4O54EZX0", Object: "text_completion", Created: 1679241459, Model: "text-davinci-003", Choices: []gogpt.CompletionChoice[(*"github.com/sashabaranov/go-gpt3.CompletionChoice")(0x140004d0900)], Usage: github.com/sashabaranov/go-gpt3.Usage {PromptTokens: 139, CompletionTokens: 144, TotalTokens: 283}}
 	result, err := client.CreateCompletion(context, *completionParams)
 	if err != nil {
 		log.Println(err.Error())

@@ -3,6 +3,7 @@ package main
 //go:generate oapi-codegen --package=api -generate=types -o ./api/storygenie.gen.go https://api.swaggerhub.com/apis/swagger354/storygenie/0.0.2
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"storygenie-backend/controller"
@@ -14,12 +15,31 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
+
+	"github.com/getsentry/sentry-go"
+	sentrygin "github.com/getsentry/sentry-go/gin"
 )
 
 func main() {
 	loadEnv()
+	initializeSentry()
 	helper.GetFirebaseApp()
 	serveApplication()
+}
+
+func initializeSentry() {
+	SENTRY_DSN_KEY := os.Getenv("SENTRY_DSN_KEY")
+	if SENTRY_DSN_KEY == "" {
+		panic("Sentry DSN key not found")
+	}
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:              SENTRY_DSN_KEY,
+		EnableTracing:    true,
+		TracesSampleRate: 1.0,
+	}); err != nil {
+		fmt.Printf("Sentry initialization failed: %v\n", err)
+	}
+	log.Print("Sentry initialized.")
 }
 
 func loadDatabase() *gorm.DB {
@@ -37,6 +57,7 @@ func loadEnv() {
 func serveApplication() {
 	pCtrl := controller.PublicController{Database: loadDatabase()}
 	router := gin.Default()
+	router.Use(sentrygin.New(sentrygin.Options{}))
 	config := cors.DefaultConfig()
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 	config.AllowOrigins = []string{"http://localhost:5173", "http://localhost:3200", "https://app.storygenie.io"}
