@@ -54,6 +54,10 @@ func loadEnv() {
 }
 
 func serveApplication() {
+	if os.Getenv("ENVIRONMENT") == "production" {
+		gin.SetMode(gin.ReleaseMode)
+		initializeSentry()
+	}
 	pCtrl := controller.PublicController{Database: loadDatabase()}
 	router := gin.Default()
 	router.Use(sentrygin.New(sentrygin.Options{}))
@@ -77,9 +81,6 @@ func serveApplication() {
 	privateRoutes.DELETE("/product/:productId", pCtrl.DeleteProduct)
 	if os.Getenv("ENVIRONMENT") != "production" {
 		privateRoutes.GET("/seed", pCtrl.SeedDatabase)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-		initializeSentry()
 	}
 
 	port := os.Getenv("PORT")
