@@ -22,7 +22,6 @@ import (
 
 func main() {
 	loadEnv()
-	initializeSentry()
 	helper.GetFirebaseApp()
 	serveApplication()
 }
@@ -65,9 +64,6 @@ func serveApplication() {
 	router.GET("/health", pCtrl.HealthCheck)
 	privateRoutes := router.Group("/api")
 	privateRoutes.Use(middleware.Authentication)
-	// if os.Getenv("ENVIRONMENT") != "production" {
-	// 	privateRoutes.GET("/seed", pCtrl.SeedDatabase)
-	// }
 	privateRoutes.GET("/story", pCtrl.GetStories)
 	privateRoutes.GET("/story/:storyId", pCtrl.GetStoryById)
 	privateRoutes.POST("/story", pCtrl.CreateStory)
@@ -79,14 +75,19 @@ func serveApplication() {
 	privateRoutes.GET("/product/:productId", pCtrl.GetProductById)
 	privateRoutes.POST("/product", pCtrl.CreateProduct)
 	privateRoutes.DELETE("/product/:productId", pCtrl.DeleteProduct)
+	if os.Getenv("ENVIRONMENT") != "production" {
+		privateRoutes.GET("/seed", pCtrl.SeedDatabase)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+		initializeSentry()
+	}
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		log.Print("Defaulting to port 8000")
+		log.Print("No PORT env var, defaulting to port 8000")
 		port = "8000"
 	}
 
-	log.Print("Hello from Cloud Run! The container started successfully and is listening for HTTP requests on $PORT")
-	log.Printf("Listening on port %s", port)
+	log.Printf("Hello from %s The container started successfully and is listening for HTTP requests on %s", os.Getenv("ENVIRONMENT"), port)
 	router.Run(":" + port)
 }
