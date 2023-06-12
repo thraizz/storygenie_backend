@@ -66,7 +66,7 @@ func serveApplication() {
 	router.Use(sentrygin.New(sentrygin.Options{}))
 	config := cors.DefaultConfig()
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
-	config.AllowOrigins = []string{"http://localhost:5173", "http://localhost:3200", "https://app.storygenie.io"}
+	config.AllowOrigins = []string{"http://localhost:5173", "http://localhost:3200", "https://app.storygenie.io", "https://feat-jira-integration.storygenie-byg.pages.dev"}
 	router.Use(cors.New(config))
 	router.GET("/health", pCtrl.HealthCheck)
 	privateRoutes := router.Group("/api")
