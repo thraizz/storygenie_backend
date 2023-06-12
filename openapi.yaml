@@ -1,0 +1,600 @@
+openapi: 3.0.0
+info:
+  title: Storygenie API - OpenAPI 3.0
+  description: |-
+    The Storygenie API is a RESTful API that allows you to create and manage user stories and products.
+    Some useful links:
+    - [the repo](https://github.com/thraizz/storygenie)
+  termsOfService: http://storygenie.io/terms/
+  contact:
+    email: api@storygenie.io
+  version: 0.0.3
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/swagger354/storygenie/0.0.3
+  - url: http://localhost:8000/api/
+  - url: https://api.storygenie.io/api/
+tags:
+  - name: stories
+    description: Operations handling stories
+  - name: products
+    description: Operations handling products
+security:
+  - BearerAuth: []
+paths:
+  /jira/secret:
+    get:
+      summary: Get jira app client secret
+      tags:
+        - jira
+      operationId: getJiraClientSecret
+      responses:
+        "200":
+          description: Successfully retrieved jira client secret
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "clientSecret"
+  /jira/refresh:
+    get:
+      summary: Get jira client refresh token for this user
+      tags:
+        - jira
+      operationId: getJiraRefreshToken
+      responses:
+        "200":
+          description: Successfully retrieved jira client refresh token
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "clientRefreshToken"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Set jira client refresh token after authorizing
+      tags:
+        - jira
+      operationId: setJiraRefreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        "200":
+          description: Successfully set client refresh token
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "clientSecret"
+  /story:
+    post:
+      operationId: createStory
+      summary: Creates a new story
+      tags:
+        - stories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Story"
+      responses:
+        "200":
+          description: Successfully created a story
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Story"
+              example:
+                headline: "Story creation"
+                userStory: "As a user I want to be able to create a new story"
+                acceptanceCriteria:
+                  - "The story should have a headline"
+                  - "The story should have a user story"
+                  - "The story should have acceptance criteria"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    get:
+      security:
+        - BearerAuth: []
+      operationId: getAllStories
+      tags:
+        - stories
+      summary: Gets all stories
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+          description: The numbers of items to return
+      responses:
+        "200":
+          description: Successfully retrieved all stories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Story"
+              example:
+                - headline: "As a user I want to be able to create a new story"
+                  userStory: "As a user I want to be able to create a new story"
+                  acceptanceCriteria:
+                    - "The story should have a headline"
+                    - "The story should have a user story"
+                    - "The story should have acceptance criteria"
+                - headline: "As a user I want to be able to create a new product"
+                  userStory: "As a user I want to be able to create a new product"
+                  acceptanceCriteria:
+                    - "The product should have a name"
+                    - "The product should have a description"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /story/generate:
+    post:
+      operationId: generateStory
+      tags:
+        - stories
+      summary: Generates a new story
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StoryInput"
+      responses:
+        "200":
+          description: Successfully generated a story
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Story"
+              example:
+                headline: "As a user I want to be able to create a new story"
+                userStory: "As a user I want to be able to create a new story"
+                acceptanceCriteria:
+                  - "The story should have a headline"
+                  - "The story should have a user story"
+                  - "The story should have acceptance criteria"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /story/{storyId}/feedback:
+    parameters:
+      - in: path
+        name: storyId
+        description: The id of the story
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getFeedbackForStory
+      tags:
+        - stories
+      summary: Gets feedback for a story
+      responses:
+        "200":
+          description: Successfully retrieved feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+              example:
+                - storyId: "c35c1dc1-20bf-4630-aac4-f2e6d3c227ab"
+                - liked: true
+    post:
+      operationId: addFeedbackForStory
+      tags:
+        - stories
+      summary: Adds feedback for a story
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Feedback"
+      responses:
+        "200":
+          description: Successfully added feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+              example:
+                - storyId: "c35c1dc1-20bf-4630-aac4-f2e6d3c227ab"
+                - liked: true
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /story/{storyId}:
+    get:
+      operationId: getStoryById
+      tags:
+        - stories
+      summary: Gets a story by id
+      parameters:
+        - in: path
+          name: storyId
+          description: The id of the story
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Successfully retrieved a story
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Story"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteStoryById
+      tags:
+        - stories
+      summary: Deletes a story by id
+      parameters:
+        - in: path
+          name: storyId
+          description: The id of the story
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully deleted a story
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /product:
+    post:
+      operationId: createProduct
+      tags:
+        - products
+      summary: Creates a new product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "200":
+          description: Successfully created a product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+              example:
+                name: "My first product"
+                description: "This is my first product"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    get:
+      operationId: getAllProducts
+      tags:
+        - products
+      summary: Gets all products
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+          description: The numbers of items to return
+      responses:
+        "200":
+          description: Successfully retrieved all products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+              example:
+                - name: "My first product"
+                  description: "This is my first product"
+                - name: "My second product"
+                  description: "This is my second product"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /product/summary:
+    get:
+      operationId: getSummaryOfAllProducts
+      tags:
+        - products
+      summary: Gets all products and linked stories, limited to important fields
+      responses:
+        "200":
+          description: Successfully retrieved all products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+              example:
+                - name: "My first product"
+                  description: "This is my first product"
+                - name: "My second product"
+                  description: "This is my second product"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  "/product/{productId}":
+    get:
+      operationId: getProductById
+      tags:
+        - products
+      summary: Gets a product by id
+      parameters:
+        - in: path
+          name: productId
+          description: The id of the product
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Successfully retrieved a product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductWithStories"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteProductById
+      tags:
+        - products
+      summary: Deletes a product by id
+      parameters:
+        - in: path
+          name: productId
+          description: The id of the product
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Successfully retrieved a product
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "ok"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  schemas:
+    StoryInput:
+      type: object
+      required:
+        - description
+        - productId
+      properties:
+        productId:
+          type: string
+          format: uuid
+          description: The product id
+        description:
+          type: string
+          minLength: 100
+          maxLength: 1000
+          description: The description is a general idea of the story.
+      example:
+        productId: "asdf24e1234"
+        description: "We should integrate Google Analytics so that we better understand where we loose users in the checkout flow."
+    Story:
+      type: object
+      required:
+        - id
+        - headline
+        - userStory
+        - acceptanceCriteria
+        - productId
+        - createdAt
+        - updatedAt
+        - deletedAt
+        - product
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The id of the story
+        headline:
+          type: string
+          description: The headline of the story
+        userStory:
+          type: string
+          description: The user story of the story
+        acceptanceCriteria:
+          type: array
+          description: The acceptance criteria of the story
+          items:
+            type: string
+        productId:
+          type: string
+          format: uuid
+          description: The id of the product
+        createdAt:
+          type: string
+          format: date-time
+          description: The date the product was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date the product was updated
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date the product was deleted
+        product:
+          $ref: "#/components/schemas/Product"
+      example:
+        id: 1
+        headline: "Integrate Google Analytics into webshop"
+        userStory: "As an administrator, I want to integrate Google Analytics into the webshop so that I can track user behaviour in the checkout flow."
+        acceptanceCriteria:
+          - Google Analytics is integrated into the webshop
+          - "Four events are tracked in the checkout flow: 'Add to Cart', 'Checkout Started', 'Checkout Completed', and 'Order Placed'"
+          - The events are tracked accurately and reliably
+          - The events are tracked in a way that is compliant with Google Analytics' terms of service
+        createdAt: "2023-03-18T23:41:02.6Z"
+        updatedAt: "2023-03-18T23:41:02.6Z"
+        deletedAt: null
+    Feedback:
+      type: object
+      required:
+        - storyId
+        - liked
+      properties:
+        storyId:
+          type: string
+          format: uuid
+          description: The story id
+        liked:
+          type: boolean
+          description: Whether the user liked the story or not.
+      example:
+        productId: "asdf24e1234"
+        description: "We should integrate Google Analytics so that we better understand where we loose users in the checkout flow."
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - createdAt
+        - updatedAt
+        - deletedAt
+        - isExample
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The id of the product
+        createdAt:
+          type: string
+          format: date-time
+          description: The date the product was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date the product was updated
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date the product was deleted
+        name:
+          type: string
+          description: The name of the product
+        description:
+          type: string
+          description: The description of the product
+          minLength: 300
+        isExample:
+          type: boolean
+          description: Whether the product is an example product
+      example:
+        name: "My first product"
+        description: "This is my first product"
+        id: 1,
+        createdAt: "2023-03-18T23:41:02.6Z"
+        updatedAt: "2023-03-18T23:41:02.6Z"
+        deletedAt: null
+        isExample: false
+    ProductInput:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          description: The name of the product
+        description:
+          type: string
+          description: The description of the product
+          minLength: 300
+      example:
+        name: "My first product"
+        description: "Storygenie is a project that allows users to improve their scrum process by generating stories after providing a bit of context."
+    ProductWithStories:
+      allOf:
+        - type: object
+          properties:
+            stories:
+              type: array
+              items:
+                $ref: "#/components/schemas/Story"
+        - $ref: "#/components/schemas/Product"
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        hint:
+          type: string
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 401
+            message: "Bad request."
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 404
+            message: "Not found."
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 500
+            message: "Internal server error."
+    SuccessResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            properties:
+              status:
+                type: string
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -54,6 +54,15 @@ type Product struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+// ProductInput defines model for ProductInput.
+type ProductInput struct {
+	// Description The description of the product
+	Description string `json:"description"`
+
+	// Name The name of the product
+	Name string `json:"name"`
+}
+
 // ProductWithStories defines model for ProductWithStories.
 type ProductWithStories struct {
 	// CreatedAt The date the product was created
@@ -122,6 +131,11 @@ type BadRequest = Error
 // NotFound defines model for NotFound.
 type NotFound = Error
 
+// SetJiraRefreshTokenJSONBody defines parameters for SetJiraRefreshToken.
+type SetJiraRefreshTokenJSONBody struct {
+	RefreshToken string `json:"refreshToken"`
+}
+
 // GetAllProductsParams defines parameters for GetAllProducts.
 type GetAllProductsParams struct {
 	// Limit The numbers of items to return
@@ -134,8 +148,11 @@ type GetAllStoriesParams struct {
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
+// SetJiraRefreshTokenJSONRequestBody defines body for SetJiraRefreshToken for application/json ContentType.
+type SetJiraRefreshTokenJSONRequestBody SetJiraRefreshTokenJSONBody
+
 // CreateProductJSONRequestBody defines body for CreateProduct for application/json ContentType.
-type CreateProductJSONRequestBody = Product
+type CreateProductJSONRequestBody = ProductInput
 
 // CreateStoryJSONRequestBody defines body for CreateStory for application/json ContentType.
 type CreateStoryJSONRequestBody = Story
