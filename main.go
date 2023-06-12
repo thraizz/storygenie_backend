@@ -1,6 +1,6 @@
 package main
 
-//go:generate oapi-codegen --package=api -generate=types -o ./api/storygenie.gen.go https://api.swaggerhub.com/apis/swagger354/storygenie/0.0.2
+//go:generate oapi-codegen --package=api -generate=types -o ./api/storygenie.gen.go https://api.swaggerhub.com/apis/swagger354/storygenie/0.0.3
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 	"storygenie-backend/database"
 	"storygenie-backend/helper"
 	"storygenie-backend/middleware"
+	"storygenie-backend/models"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -43,9 +44,11 @@ func initializeSentry() {
 
 func loadDatabase() *gorm.DB {
 	database := database.Connect()
-	// database.AutoMigrate(&models.Story{})
-	// database.AutoMigrate(&models.Product{})
-	// database.AutoMigrate(&models.Feedback{})
+	database.AutoMigrate(&models.Story{})
+	database.AutoMigrate(&models.Prompt{})
+	database.AutoMigrate(&models.Product{})
+	database.AutoMigrate(&models.Feedback{})
+	database.AutoMigrate(&models.JiraRefreshToken{})
 	return database
 }
 
@@ -68,6 +71,9 @@ func serveApplication() {
 	router.GET("/health", pCtrl.HealthCheck)
 	privateRoutes := router.Group("/api")
 	privateRoutes.Use(middleware.Authentication)
+	privateRoutes.GET("/jira/secret", pCtrl.GetJiraClientSecret)
+	privateRoutes.GET("/jira/refresh", pCtrl.GetJiraRefreshToken)
+	privateRoutes.PUT("/jira/refresh", pCtrl.SetJiraRefreshToken)
 	privateRoutes.GET("/story", pCtrl.GetStories)
 	privateRoutes.GET("/story/:storyId", pCtrl.GetStoryById)
 	privateRoutes.POST("/story", pCtrl.CreateStory)
@@ -79,9 +85,9 @@ func serveApplication() {
 	privateRoutes.GET("/product/:productId", pCtrl.GetProductById)
 	privateRoutes.POST("/product", pCtrl.CreateProduct)
 	privateRoutes.DELETE("/product/:productId", pCtrl.DeleteProduct)
-	// if os.Getenv("ENVIRONMENT") != "production" {
-	// 	privateRoutes.GET("/seed", pCtrl.SeedDatabase)
-	// }
+	if os.Getenv("ENVIRONMENT") == "dev" {
+		privateRoutes.GET("/seed", pCtrl.SeedDatabase)
+	}
 
 	port := os.Getenv("PORT")
 	if port == "" {
