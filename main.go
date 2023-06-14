@@ -76,6 +76,7 @@ func serveApplication() {
 	privateRoutes.PUT("/jira/refresh", pCtrl.SetJiraRefreshToken)
 	privateRoutes.GET("/story", pCtrl.GetStories)
 	privateRoutes.GET("/story/:storyId", pCtrl.GetStoryById)
+	privateRoutes.PUT("/story/:storyId", pCtrl.UpdateStoryById)
 	privateRoutes.POST("/story", pCtrl.CreateStory)
 	privateRoutes.DELETE("/story/:storyId", pCtrl.DeleteStory)
 	privateRoutes.GET("/story/:storyId/feedback", pCtrl.GetFeedbackForStory)

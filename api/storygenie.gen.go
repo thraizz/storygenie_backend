@@ -103,8 +103,11 @@ type Story struct {
 	Headline string `json:"headline"`
 
 	// Id The id of the story
-	Id      openapi_types.UUID `json:"id"`
-	Product Product            `json:"product"`
+	Id openapi_types.UUID `json:"id"`
+
+	// JiraIssueId The jira issue this story is linked to
+	JiraIssueId string `json:"jiraIssueId"`
+	Product     Product `json:"product"`
 
 	// ProductId The id of the product
 	ProductId openapi_types.UUID `json:"productId"`

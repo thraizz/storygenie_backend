@@ -46,6 +46,7 @@ func (c *PublicController) GetStories(context *gin.Context) {
 			AcceptanceCriteria: story.AcceptanceCriteria,
 			Product:            product,
 			ProductId:          story.ProductID,
+			JiraIssueId:        story.JiraIssueID,
 		})
 	}
 
@@ -84,6 +85,7 @@ func (c *PublicController) GetStoryById(context *gin.Context) {
 		Headline:           story.Headline,
 		UserStory:          story.UserStory,
 		AcceptanceCriteria: story.AcceptanceCriteria,
+		JiraIssueId:        story.JiraIssueID,
 	}
 
 	context.JSON(http.StatusOK, response)
@@ -216,4 +218,41 @@ func (c *PublicController) DeleteStory(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"data": "Story deleted"})
+}
+
+func (c *PublicController) UpdateStoryById(context *gin.Context) {
+	var story models.Story
+	var input api.Story
+	if err := context.ShouldBindJSON(&input); err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result := c.Database.First(&story, "uid = ? AND user_id = ?", input.Id, context.MustGet("user_id").(string))
+
+	if result.Error != nil {
+		if result.Error.Error() == "record not found" {
+			context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Story not found"})
+			return
+		}
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Story not found"})
+		return
+	}
+
+	story.Headline = input.Headline
+	story.UserStory = input.UserStory
+	story.AcceptanceCriteria = input.AcceptanceCriteria
+	story.JiraIssueID = input.JiraIssueId
+
+	result = c.Database.Save(&story)
+	if result.Error != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"data": "Story updated"})
 }

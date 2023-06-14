@@ -19,6 +19,7 @@ type Story struct {
 	AcceptanceCriteria datatypes.JSON `json:"acceptanceCriteria"`
 	Product            Product
 	ProductID          uuid.UUID `json:"productId"`
+	JiraIssueID        string    `json:"jiraIssueId"`
 }
 
 type GetStoryInput struct {
