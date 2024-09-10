@@ -2,6 +2,10 @@
 
 This is the backend for the Storygenie app. It is a Go application that uses the Gin framework. It is a REST API that is used by the Storygenie app to store and retrieve data.
 
+## Database
+The database provider of choice is [Planetscale](https://planetscale.com/), a MySQL database plattform based on [Vitess](https://vitess.io/).
+This decision was made due to their generous free tier and ability to scale through [horizontal sharding](https://planetscale.com/sharding)
+
 ## Setup
 
 To run the application, you need to have Go installed. You can download it from [here](https://golang.org/dl/).
