@@ -17,18 +17,20 @@ go generate
 
 ## Operations
 
-Building with Cloud Build:
+This project uses gcloud as cloud service. To deploy, obtain a valid serviceAccount for a project and replace the `foobar` occurences below with your project name, then run:
+
+Build:
 
 ```bash
-gcloud builds submit --tag us-central1-docker.pkg.dev/storygenie-7e240/cloud-run-source-deploy/storygeniebackend:latest
+gcloud builds submit --tag us-central1-docker.pkg.dev/foobar/cloud-run-source-deploy/storygeniebackend:latest
 ```
 
-Deploying with Cloud Run:
+Deploy:
 
 ```bash
 gcloud run deploy storygeniebackend \
---image=us-central1-docker.pkg.dev/storygenie-7e240/cloud-run-source-deploy/storygeniebackend:latest \
+--image=us-central1-docker.pkg.dev/foobar/cloud-run-source-deploy/storygeniebackend:latest \
 --region=us-central1 \
---project=storygenie-7e240 \
- && gcloud run services update-traffic storygeniebackend --to-latest --region=us-central1 --project=storygenie-7e240
+--project=foobar \
+ && gcloud run services update-traffic storygeniebackend --to-latest --region=us-central1 --project=foobar
 ```
