@@ -4,7 +4,8 @@ This is the backend for the Storygenie app. It is a Go application that uses the
 
 ## Database
 The database provider of choice is [Planetscale](https://planetscale.com/), a MySQL database plattform based on [Vitess](https://vitess.io/).
-This decision was made due to their generous free tier and ability to scale through [horizontal sharding](https://planetscale.com/sharding)
+This decision was made due to their generous free tier and ability to scale through [horizontal sharding](https://planetscale.com/sharding).
+You can replace this with any MySQL database and set it in the `.env` file though.
 
 ## Setup
 
